@@ -1,6 +1,6 @@
 <template>
   <div class="hello">
-    <!-- <div>{{candy}}</div> -->
+    <!-- a form to enter that will post -->
    
     <form action="javascript:void(0)" id="candy_form">
       <p>Name:</p>
@@ -16,6 +16,7 @@
       <br />
       <input type="text" name="image" id="url_id" />
       <br />
+      <!-- post_candy function runs on click -->
       <input
         id="submitNewCandy"
         type="submit"
@@ -23,16 +24,18 @@
         @click="post_candy"
       />
     </form>
+    <!-- run the candy object in a for loop -->
     <div id="container" v-for="object in candy" :key="object[0]">
       <div>
       <h1>{{ object[0] }}</h1>
       <h4>{{ object[2] }}</h4>
       <h4>{{ object[4] }}</h4>
       <img :src="object[3]" alt="candy image" />
+      <!-- run the delete function on this buttons click -->
       <button @click="delete_candy(object[1])">Delete</button>
       </div>
      
-      
+      <!-- a form for the update, the id's are set with the id of the candy -->
       <form action="javascript:void(0)" id="update_form">
         <p>Update Price:</p>
         <input type="text" name="price" value="0" :id="'price' + object[1]" />
@@ -46,6 +49,7 @@
         <p>Update Image Url:</p>
         <input type="text" name="image" :id="'img' + object[1]" />
         <br />
+        <!-- update function on submit -->
         <input
           type="submit"
           value="Update candy"
@@ -62,14 +66,18 @@ export default {
   name: "HelloWorld",
   data() {
     return {
+      // empty candy array
       candy: [],
     };
   },
   mounted() {
+    // on page mounted the get candy function will run
     this.get_candy();
   },
   methods: {
+    
     post_candy: function () {
+      // axios reqeuet to my testing server
       axios
         .request({
           method: "POST",
@@ -77,6 +85,7 @@ export default {
           headers: {
             "Content-Type": "application/json",
           },
+          // take in the new data
           data: {
             name: document.getElementById("name_id").value,
             description: document.getElementById("description_id").value,
@@ -87,6 +96,7 @@ export default {
         .then((res) => {
           console.log(res);
           document.getElementById("candy_form").reset();
+          // push the new candy onto the array
           this.candy.push(res.data);
         })
         .catch((err) => {
@@ -102,6 +112,7 @@ export default {
           headers: {
             "Content-Type": "application/json",
           },
+          // send the json data to the api
           data: {
             id: candyId,
             newPrice: document.getElementById("price" + candyId).value,
@@ -112,7 +123,9 @@ export default {
         })
         .then((res) => {
           console.log(res.data);
+          // reset the form on submit
           document.forms["update_form"].reset();
+          // reset the price value to 0
           document.getElementById("price" + candyId).value = 0;
           this.get_candy();
 
@@ -155,7 +168,7 @@ export default {
         .then((res) => {
           console.log(res);
           this.get_candy();
-          // document.getElementById("container").reset();
+          
         })
         .catch((err) => {
           console.log(err);
@@ -165,7 +178,6 @@ export default {
 };
 </script>
 
-<!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
 #container {
   display: grid;
