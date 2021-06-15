@@ -1,6 +1,7 @@
 <template>
   <div class="hello">
     <!-- <div>{{candy}}</div> -->
+   
     <form action="javascript:void(0)" id="candy_form">
       <p>Name:</p>
       <br />
@@ -23,25 +24,35 @@
       />
     </form>
     <div id="container" v-for="object in candy" :key="object[0]">
+      <div>
       <h1>{{ object[0] }}</h1>
       <h4>{{ object[2] }}</h4>
-      <h4>{{ object[4]}}</h4>
+      <h4>{{ object[4] }}</h4>
       <img :src="object[3]" alt="candy image" />
-      <br />
       <button @click="delete_candy(object[1])">Delete</button>
-      <form action="javascript:void(0)" class="candy_form">
-        <p> Update Price: </p>
-        <input type="text" name="price" :id="'price' + object[1]" />
-        <br>
+      </div>
+     
+      
+      <form action="javascript:void(0)" id="update_form">
+        <p>Update Price:</p>
+        <input type="text" name="price" value="0" :id="'price' + object[1]" />
+        <br />
+        <p>Update Name:</p>
+        <input type="text" name="name" :id="'name' + object[1]" />
+        <br />
+        <p>Update Description:</p>
+        <input type="text" name="description" :id="'desc' + object[1]" />
+        <br />
+        <p>Update Image Url:</p>
+        <input type="text" name="image" :id="'img' + object[1]" />
+        <br />
         <input
-        type="submit"
-        value="Update candy"
-        @click="patch_candy(object[1])"
-      />
+          type="submit"
+          value="Update candy"
+          @click="patch_candy(object[1])"
+        />
       </form>
     </div>
-    <br />
-    <button @click="get_candy()">Click me!</button>
   </div>
 </template>
 
@@ -94,11 +105,18 @@ export default {
           data: {
             id: candyId,
             newPrice: document.getElementById("price" + candyId).value,
+            newName: document.getElementById("name" + candyId).value,
+            newDesc: document.getElementById("desc" + candyId).value,
+            newImg: document.getElementById("img" + candyId).value
           },
         })
         .then((res) => {
           console.log(res.data);
+          document.forms["update_form"].reset();
+          document.getElementById("price" + candyId).value = 0;
           this.get_candy();
+
+
         })
         .catch((err) => {
           console.log(err);
@@ -149,6 +167,10 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
+#container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
 h3 {
   margin: 40px 0 0;
 }
