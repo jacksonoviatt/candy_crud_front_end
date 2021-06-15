@@ -1,42 +1,150 @@
 <template>
   <div class="hello">
-    <h1>{{ msg }}</h1>
-    <p>
-      For a guide and recipes on how to configure / customize this project,<br>
-      check out the
-      <a href="https://cli.vuejs.org" target="_blank" rel="noopener">vue-cli documentation</a>.
-    </p>
-    <h3>Installed CLI Plugins</h3>
-    <ul>
-      <li><a href="https://github.com/vuejs/vue-cli/tree/dev/packages/%40vue/cli-plugin-babel" target="_blank" rel="noopener">babel</a></li>
-      <li><a href="https://github.com/vuejs/vue-cli/tree/dev/packages/%40vue/cli-plugin-eslint" target="_blank" rel="noopener">eslint</a></li>
-    </ul>
-    <h3>Essential Links</h3>
-    <ul>
-      <li><a href="https://vuejs.org" target="_blank" rel="noopener">Core Docs</a></li>
-      <li><a href="https://forum.vuejs.org" target="_blank" rel="noopener">Forum</a></li>
-      <li><a href="https://chat.vuejs.org" target="_blank" rel="noopener">Community Chat</a></li>
-      <li><a href="https://twitter.com/vuejs" target="_blank" rel="noopener">Twitter</a></li>
-      <li><a href="https://news.vuejs.org" target="_blank" rel="noopener">News</a></li>
-    </ul>
-    <h3>Ecosystem</h3>
-    <ul>
-      <li><a href="https://router.vuejs.org" target="_blank" rel="noopener">vue-router</a></li>
-      <li><a href="https://vuex.vuejs.org" target="_blank" rel="noopener">vuex</a></li>
-      <li><a href="https://github.com/vuejs/vue-devtools#vue-devtools" target="_blank" rel="noopener">vue-devtools</a></li>
-      <li><a href="https://vue-loader.vuejs.org" target="_blank" rel="noopener">vue-loader</a></li>
-      <li><a href="https://github.com/vuejs/awesome-vue" target="_blank" rel="noopener">awesome-vue</a></li>
-    </ul>
+    <!-- <div>{{candy}}</div> -->
+    <form action="javascript:void(0)" id="candy_form">
+      <p>Name:</p>
+      <br />
+      <input type="text" name="name" id="name_id" />
+      <p>Description:</p>
+      <br />
+      <input type="text" name="description" id="description_id" />
+      <p>Price:</p>
+      <br />
+      <input type="text" name="price" id="price_id" />
+      <p>Image Url:</p>
+      <br />
+      <input type="text" name="image" id="url_id" />
+      <br />
+      <input
+        id="submitNewCandy"
+        type="submit"
+        value="Post candy"
+        @click="post_candy"
+      />
+    </form>
+    <div id="container" v-for="object in candy" :key="object[0]">
+      <h1>{{ object[0] }}</h1>
+      <h4>{{ object[2] }}</h4>
+      <h4>{{ object[4]}}</h4>
+      <img :src="object[3]" alt="candy image" />
+      <br />
+      <button @click="delete_candy(object[1])">Delete</button>
+      <form action="javascript:void(0)" class="candy_form">
+        <p> Update Price: </p>
+        <input type="text" name="price" :id="'price' + object[1]" />
+        <br>
+        <input
+        type="submit"
+        value="Update candy"
+        @click="patch_candy(object[1])"
+      />
+      </form>
+    </div>
+    <br />
+    <button @click="get_candy()">Click me!</button>
   </div>
 </template>
 
 <script>
+import axios from "axios";
 export default {
-  name: 'HelloWorld',
-  props: {
-    msg: String
-  }
-}
+  name: "HelloWorld",
+  data() {
+    return {
+      candy: [],
+    };
+  },
+  mounted() {
+    this.get_candy();
+  },
+  methods: {
+    post_candy: function () {
+      axios
+        .request({
+          method: "POST",
+          url: "http://127.0.0.1:5000/candy",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          data: {
+            name: document.getElementById("name_id").value,
+            description: document.getElementById("description_id").value,
+            price: document.getElementById("price_id").value,
+            image_url: document.getElementById("url_id").value,
+          },
+        })
+        .then((res) => {
+          console.log(res);
+          document.getElementById("candy_form").reset();
+          this.candy.push(res.data);
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    },
+
+    patch_candy: function (candyId) {
+      axios
+        .request({
+          method: "PATCH",
+          url: "http://127.0.0.1:5000/candy",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          data: {
+            id: candyId,
+            newPrice: document.getElementById("price" + candyId).value,
+          },
+        })
+        .then((res) => {
+          console.log(res.data);
+          this.get_candy();
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    },
+
+    get_candy: function () {
+      axios
+        .request({
+          method: "GET",
+          url: "http://127.0.0.1:5000/candy",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        })
+        .then((res) => {
+          this.candy = res.data;
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    },
+
+    delete_candy: function (id) {
+      axios
+        .request({
+          method: "DELETE",
+          url: "http://127.0.0.1:5000/candy",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          data: {
+            candyId: id,
+          },
+        })
+        .then((res) => {
+          console.log(res);
+          this.get_candy();
+          // document.getElementById("container").reset();
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    },
+  },
+};
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
@@ -52,7 +160,7 @@ li {
   display: inline-block;
   margin: 0 10px;
 }
-a {
-  color: #42b983;
+img {
+  height: 150px;
 }
 </style>
